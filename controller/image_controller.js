@@ -19,6 +19,8 @@ const uploadImage = async (req, res, next) => {
 
     const { name, person, tags } = req.body
 
+
+
     if (!file) {
         return next(new HttpError("No file uploaded", 500, errors.array()))
     }
@@ -41,20 +43,21 @@ const uploadImage = async (req, res, next) => {
             folder: "uploads"
         })
 
+        const tagsArray = tags.split(",").map((tag) => tag.trim())
+
+
+
         const image = new Image({
             imageUrl: result.secure_url,
             publicId: result.public_id,
             name,
             person,
             albumId,
-            tags,
+            tags: tagsArray,
             size: file.size
         })
 
         await image.save()
-
-   
-
         res.status(201).json({
             message: "Image added successfully.",
             image: image.toObject({ getters: true })

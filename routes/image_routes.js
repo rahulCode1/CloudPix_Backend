@@ -23,8 +23,9 @@ const imageUploadValidation = [
         .bail()
         .isMongoId()
         .withMessage("Album id must be mongoose id."),
-    body("tags").isArray({ min: 1 }).withMessage("Atleast 1 tag required.")
+    body("tags").trim().notEmpty().withMessage("Tags are required.")
 ]
+
 
 const albumAndImgIdValidation = [
     param("albumId")

@@ -41,6 +41,11 @@ const updateDescriptionValidation = [
 
 ]
 
+const emailTypeValidation = [
+    body("emails").trim().notEmpty().
+        withMessage("Emails required").isEmail().
+        withMessage("Please enter a valid email address.")
+]
 
 router.get("/", getAllAlbums)
 router.get("/:albumId/images/favorites",
@@ -52,14 +57,16 @@ router.get('/:albumId/images',
     auth_check,
     getAllImageInAnAlbum)
 router.post('/',
-     addAlbumValidation,
+    addAlbumValidation,
+
     auth_check,
     createAlbum)
-router.put('/:albumId', 
+router.put('/:albumId',
     updateDescriptionValidation,
     auth_check,
     updateAlbumDescription)
 router.put('/:albumId/share',
+    emailTypeValidation,
     auth_check,
     addUserToShareAlbum)
 router.delete('/:albumId',
