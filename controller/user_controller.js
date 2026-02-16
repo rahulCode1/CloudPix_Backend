@@ -12,11 +12,13 @@ const oauthLogin = async (req, res, next) => {
 
         const googleAuthUrl = `https://accounts.google.com/o/oauth2/auth` +
             `?client_id=${process.env.GOOGLE_CLIENT_ID}` +
-            `&redirect_uri=http://localhost:${PORT}/auth/google/callback` +
+            `&redirect_uri=${process.env.BACKEND_URL}/auth/google/callback` +
             `&response_type=code&scope=profile email`
 
         res.redirect(googleAuthUrl)
-    } catch (error) { next(error) }
+    } catch (error) { 
+        next(error) 
+    }
 }
 
 const oauthCallback = async (req, res, next) => {
@@ -34,7 +36,7 @@ const oauthCallback = async (req, res, next) => {
             client_secret: process.env.GOOGLE_CLIENT_SECRET,
             code,
             grant_type: 'authorization_code',
-            redirect_uri: `http://localhost:${PORT}/auth/google/callback`
+            redirect_uri: `${process.env.BACKEND_URL}/auth/google/callback`
         }, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
