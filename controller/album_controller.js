@@ -247,12 +247,15 @@ const getAllFavoriteImageInAnAlbum = async (req, res, next) => {
             return next(new HttpError("No album exist with that id.", 404, errors.array()))
         }
 
+        if (req.userId !== album.ownerId.toString()) {
 
-        const allowedUser = album.sharedWith.includes(userId)
+            const allowedUser = album.sharedWith.includes(userId)
 
-        if (!allowedUser) {
+            if (!allowedUser) {
 
-            return next(new HttpError("Yourn't allow to see that album.", 422, errors.array()))
+                return next(new HttpError("Yourn't allow to see that album.", 422, errors.array()))
+
+            }
 
         }
 
