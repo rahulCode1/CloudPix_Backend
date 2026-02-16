@@ -7,11 +7,36 @@ const { validationResult } = require("express-validator")
 
 
 const uploadImage = async (req, res, next) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return next(new HttpError('Invalid data', 404, errors.array()))
+    }
+
+    const albumId = req.params.albumId
+    const userId = req.userId
     const file = req.file
 
-    const { albumId, name, person, tags } = req.body
+
+    const { name, person, tags } = req.body
+
+
+
     if (!file) {
         return next(new HttpError("No file uploaded", 500))
+    }
+
+
+    const album = await Album.findById(albumId)
+
+    if (!album) {
+        return next(new HttpError("No album exist with that id", 404))
+    }
+    const ownerId = album.ownerId.toString()
+
+
+    if (userId !== ownerId) {
+        return next(new HttpError("Yourn't owner of that album, Only owner can add image on that album.", 422, errors.array()))
     }
 
     try {
@@ -27,11 +52,12 @@ const uploadImage = async (req, res, next) => {
             person,
             albumId,
             tags,
-            size: file.size,
-            type: file.mimetype
+            size: file.size
         })
 
-        await image.save()
+        const savedImage = await image.save()
+
+        //  console.log(savedImage)
 
         res.status(201).json({
             message: "Image added successfully.",
@@ -45,6 +71,13 @@ const uploadImage = async (req, res, next) => {
 }
 
 const imageDetails = async (req, res, next) => {
+
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return next(new HttpError('Invalid data', 404, errors.array()))
+    }
+
     const imageId = req.params.imageId
     const albumId = req.params.albumId
     try {
@@ -69,28 +102,15 @@ const imageDetails = async (req, res, next) => {
     } catch (error) { next(error) }
 }
 
-const updateImages = async (req, res, next) => {
-    const imageId = req.params.id
-
-    try {
-        const image = await Image.findById(imageId)
-
-        if (!image) {
-            return next(new HttpError("No image found", 404))
-        }
-
-
-
-        await Image.findByIdAndUpdate(req.body)
-
-        res.status(201).json({
-            message: "Image updated successfully.",
-            image: image.toObject({ getters: true })
-        })
-    } catch (error) { next(error) }
-}
 
 const markFavoriteOrUnfavorite = async (req, res, next) => {
+
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return next(new HttpError('Invalid data', 404, errors.array()))
+    }
+
     const albumId = req.params.albumId
     const imageId = req.params.imageId
 
@@ -121,6 +141,13 @@ const markFavoriteOrUnfavorite = async (req, res, next) => {
 }
 
 const addComments = async (req, res, next) => {
+
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return next(new HttpError('Invalid data', 404, errors.array()))
+    }
+
     const imageId = req.params.imageId
     const { comment } = req.body
     try {
@@ -149,6 +176,14 @@ const addComments = async (req, res, next) => {
 
 
 const deleteImage = async (req, res, next) => {
+
+
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return next(new HttpError('Invalid data', 404, errors.array()))
+    }
+
     const imageId = req.params.imageId
     const albumId = req.params.albumId
     const userId = req.userId
@@ -166,7 +201,9 @@ const deleteImage = async (req, res, next) => {
         }
 
         if (album.ownerId.toString() !== userId) {
-            return next(new HttpError("Yourn't owner of that album, Only owner can delete image", 403))
+            return next(new HttpError("Yourn't owner of that album, Only owner can delete image",
+                403,
+                errors.array()))
         }
 
         await cloudinary.uploader.destroy(image.publicId)

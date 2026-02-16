@@ -33,9 +33,7 @@ const getAllAlbums = async (req, res, next) => {
 
 
     try {
-        const albums = await Album.find()
-
-
+        const albums = await Album.find().populate("ownerId").sort({ createdAt: -1 })
         res.status(201).json({
             message: "Albums fetched successfully.",
             albums: albums.map(album => album.toObject({ getters: true }))
@@ -86,6 +84,11 @@ const updateAlbumDescription = async (req, res, next) => {
 }
 
 const addUserToShareAlbum = async (req, res, next) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return next(new HttpError('Invalid data', 404, errors.array()))
+    }
     const albumId = req.params.albumId
     const { emails } = req.body
     const userId = req.userId
@@ -99,7 +102,6 @@ const addUserToShareAlbum = async (req, res, next) => {
         if (userId !== album.ownerId.toString()) {
             return next(new HttpError("You'r not owner of that album, Only owner can edit album", 403))
         }
-
 
         const existingUsers = await User.find({ email: { $in: emails } })
         const existingEmails = existingUsers.map(user => user.email)
@@ -167,7 +169,9 @@ const deleteAlbum = async (req, res, next) => {
             message: `${album.name} deleted successfully.`,
             albumId
         })
-    } catch (error) { next(error) }
+    } catch (error) {
+        next(error)
+    }
 }
 
 
@@ -183,22 +187,18 @@ const getAllImageInAnAlbum = async (req, res, next) => {
 
     const albumId = req.params.albumId
     const { tags } = req.query
+    const userId = req.userId
 
-    // console.log(tags)
 
     let filter = {}
 
     if (tags) {
         const tagsArray = Array.isArray(tags) ? tags : [tags]
-        filter.tags = { $all: tagsArray } 
+        filter.tags = { $all: tagsArray }
     }
 
-   
+
     try {
-        const images = await Image.find({ albumId , ...filter})
-
-
-   
         const album = await Album.findById(albumId)
 
         if (!album) {
@@ -206,8 +206,23 @@ const getAllImageInAnAlbum = async (req, res, next) => {
         }
 
 
+        if (req.userId !== album.ownerId.toString()) {
+
+            const allowedUser = album.sharedWith.includes(userId)
+
+            if (!allowedUser) {
+
+                return next(new HttpError("Yourn't allow to see that album.", 422, errors.array()))
+
+            }
+
+        }
+
+        const images = await Image.find({ albumId, ...filter }).sort({ uploadedAt: -1 })
+
         res.status(201).json({
             message: "Album fetched successfully.",
+            success: true,
             album: album.toObject({ getters: true }),
             images: images.map(image => image.toObject({ getters: true }))
         })
@@ -224,18 +239,28 @@ const getAllFavoriteImageInAnAlbum = async (req, res, next) => {
     }
 
     const albumId = req.params.albumId
+    const userId = req.userId
+
     try {
-
-
         const album = await Album.findById(albumId)
 
         if (!album) {
             return next(new HttpError("No album exist with that id.", 404))
         }
 
-        const images = await Image.find({ albumId, isFavorite: true })
+
+        const allowedUser = album.sharedWith.includes(userId)
+
+        if (!allowedUser) {
+
+            return next(new HttpError("Yourn't allow to see that album.", 422, errors.array()))
+
+        }
+
+        const images = await Image.find({ albumId, isFavorite: true }).sort({ uploadedAt: -1 })
 
         res.status(201).json({
+            success: true,
             message: "Favorite album images fetched successfully.",
             images: images.map(image => image.toObject({ getters: true }))
         })

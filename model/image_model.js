@@ -11,7 +11,6 @@ const imageSchema = new mongoose.Schema({
     isFavorite: { type: Boolean, default: false },
     comments: [{ type: String }],
     size: { type: String, required: true },
-    type: { type: String, required: true },
     uploadedAt: { type: Date, default: Date.now }
 }, { timestamps: true })
 
