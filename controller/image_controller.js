@@ -51,9 +51,9 @@ const uploadImage = async (req, res, next) => {
             size: file.size
         })
 
-        const savedImage = await image.save()
+        await image.save()
 
-        //  console.log(savedImage)
+   
 
         res.status(201).json({
             message: "Image added successfully.",
