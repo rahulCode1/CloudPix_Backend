@@ -1,7 +1,6 @@
 const Image = require("../model/image_model")
 const HttpError = require("../model/http_error")
 const cloudinary = require("cloudinary")
-const uuid = require("uuid")
 const Album = require("../model/album_model")
 const { validationResult } = require("express-validator")
 
@@ -20,17 +19,15 @@ const uploadImage = async (req, res, next) => {
 
     const { name, person, tags } = req.body
 
-
-
     if (!file) {
-        return next(new HttpError("No file uploaded", 500))
+        return next(new HttpError("No file uploaded", 500, errors.array()))
     }
 
 
     const album = await Album.findById(albumId)
 
     if (!album) {
-        return next(new HttpError("No album exist with that id", 404))
+        return next(new HttpError("No album exist with that id", 404, errors.array()))
     }
     const ownerId = album.ownerId.toString()
 
@@ -45,7 +42,6 @@ const uploadImage = async (req, res, next) => {
         })
 
         const image = new Image({
-            imageId: uuid.v4,
             imageUrl: result.secure_url,
             publicId: result.public_id,
             name,
@@ -84,13 +80,13 @@ const imageDetails = async (req, res, next) => {
         const image = await Image.findById(imageId)
 
         if (!image) {
-            return next(new HttpError("No image exist with that id", 404))
+            return next(new HttpError("No image exist with that id", 404, errors.array()))
         }
 
         const album = await Album.findById(albumId)
 
         if (!album) {
-            return next(new HttpError("No album exist with that id", 404))
+            return next(new HttpError("No album exist with that id", 404, errors.array()))
         }
 
 
@@ -99,7 +95,9 @@ const imageDetails = async (req, res, next) => {
             image: image.toObject({ getters: true }),
             album: album.toObject({ getters: true })
         })
-    } catch (error) { next(error) }
+    } catch (error) {
+        next(error)
+    }
 }
 
 
@@ -118,12 +116,12 @@ const markFavoriteOrUnfavorite = async (req, res, next) => {
         const album = await Album.findById(albumId)
 
         if (!album) {
-            return next(new HttpError(`Album not found with that id.`, 404,))
+            return next(new HttpError(`Album not found with that id.`, 404, errors.array()))
         }
         const image = await Image.findById(imageId)
 
         if (!image) {
-            return next(new HttpError(`Image not found with that id.`, 404,))
+            return next(new HttpError(`Image not found with that id.`, 404, errors.array()))
         }
 
         image.isFavorite = !image.isFavorite
@@ -156,7 +154,7 @@ const addComments = async (req, res, next) => {
         const image = await Image.findById(imageId)
 
         if (!image) {
-            return next(new HttpError("No image found with that id.", 404))
+            return next(new HttpError("No image found with that id.", 404, errors.array()))
         }
 
         image.comments.push(comment)
@@ -192,12 +190,12 @@ const deleteImage = async (req, res, next) => {
 
 
         if (!image) {
-            return next(new HttpError("No image exist with that id", 404))
+            return next(new HttpError("No image exist with that id", 404, errors.array()))
         }
 
         const album = await Album.findById(albumId)
         if (!album) {
-            return next(new HttpError("No album exist with that id", 404))
+            return next(new HttpError("No album exist with that id", 404, errors.array()))
         }
 
         if (album.ownerId.toString() !== userId) {
@@ -214,7 +212,9 @@ const deleteImage = async (req, res, next) => {
             success: true,
             message: "Image deleted successfully.",
         })
-    } catch (error) { next(error) }
+    } catch (error) {
+        next(error)
+    }
 }
 
 module.exports = {

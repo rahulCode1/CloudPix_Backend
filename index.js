@@ -35,6 +35,9 @@ app.use((req, res, next) => {
 })
 
 app.use((error, req, res, next) => {
+
+      console.error('Error:', error)
+
     if (res.headersSent) {
         return next()
     }
@@ -57,7 +60,7 @@ app.use((error, req, res, next) => {
 })
 
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 4000
 
 app.listen(PORT, () => {
     console.log(`Server running on ${PORT}`)

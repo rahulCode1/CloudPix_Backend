@@ -54,8 +54,6 @@ const updateAlbumDescription = async (req, res, next) => {
     const userId = req.userId
     const { description } = req.body
 
-
-
     try {
         const album = await Album.findById(albumId)
 
@@ -71,7 +69,7 @@ const updateAlbumDescription = async (req, res, next) => {
             await album.save()
 
         } else {
-            return next(new HttpError("You'r not owner of that album, Only owner can edit album", 401))
+            return next(new HttpError("You'r not owner of that album, Only owner can edit album", 401, errors.array()))
         }
         res.status(201).json({
             message: "Album updated.",
@@ -96,11 +94,11 @@ const addUserToShareAlbum = async (req, res, next) => {
         const album = await Album.findById(albumId)
 
         if (!album) {
-            return next(new HttpError(`No album find with that id.`, 404))
+            return next(new HttpError(`No album find with that id.`, 404, errors.array()))
         }
 
         if (userId !== album.ownerId.toString()) {
-            return next(new HttpError("You'r not owner of that album, Only owner can edit album", 403))
+            return next(new HttpError("You'r not owner of that album, Only owner can edit album", 403, errors.array()))
         }
 
         const existingUsers = await User.find({ email: { $in: emails } })
@@ -113,7 +111,8 @@ const addUserToShareAlbum = async (req, res, next) => {
             return next(
                 new HttpError(
                     `These users do not exist: ${missingEmails.join(", ")}`,
-                    422
+                    422,
+                    errors.array()
                 )
             );
         }
@@ -154,11 +153,11 @@ const deleteAlbum = async (req, res, next) => {
 
 
         if (!album) {
-            return next(new HttpError(`No album find with that id.`, 404))
+            return next(new HttpError(`No album find with that id.`, 404, errors.array()))
         }
 
         if (userId !== album.ownerId.toString()) {
-            return next(new HttpError("You'r not owner of that album, Only owner can delete album", 401))
+            return next(new HttpError("You'r not owner of that album, Only owner can delete album", 401, errors.array()))
         }
 
         await Album.findByIdAndDelete(albumId)
@@ -202,7 +201,7 @@ const getAllImageInAnAlbum = async (req, res, next) => {
         const album = await Album.findById(albumId)
 
         if (!album) {
-            return next(new HttpError("No album exist with that id.", 404))
+            return next(new HttpError("No album exist with that id.", 404, errors.array()))
         }
 
 
@@ -245,7 +244,7 @@ const getAllFavoriteImageInAnAlbum = async (req, res, next) => {
         const album = await Album.findById(albumId)
 
         if (!album) {
-            return next(new HttpError("No album exist with that id.", 404))
+            return next(new HttpError("No album exist with that id.", 404, errors.array()))
         }
 
 

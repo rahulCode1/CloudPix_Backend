@@ -1,8 +1,10 @@
 const axios = require("axios")
 const HttpError = require("../model/http_error")
 const User = require("../model/user_model")
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 4000
 const jwt = require("jsonwebtoken")
+
+
 
 
 const oauthLogin = async (req, res, next) => {
@@ -68,9 +70,6 @@ const oauthCallback = async (req, res, next) => {
 
 const loggedUser = async (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1]
-
-
-
     if (!token) {
         return next(new HttpError("Token not found.", 404))
     }
@@ -78,8 +77,6 @@ const loggedUser = async (req, res, next) => {
     try {
 
         const decode = jwt.verify(token, process.env.JWT_SECRET)
-
-
 
         const userId = decode.userId
         const user = await User.findById(userId)
