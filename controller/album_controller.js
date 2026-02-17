@@ -201,27 +201,34 @@ const getAllImageInAnAlbum = async (req, res, next) => {
         const album = await Album.findById(albumId)
 
         if (!album) {
-            return next(new HttpError("No album exist with that id.", 404, errors.array()))
+            return next(new HttpError("No album exist with that id.", 404))
         }
 
 
-        if (req.userId !== album.ownerId.toString()) {
+        if (userId !== album.ownerId.toString()) {
 
             const allowedUser = album.sharedWith.includes(userId)
 
             if (!allowedUser) {
 
-                return next(new HttpError("Yourn't allow to see that album.", 422, errors.array()))
+                return next(new HttpError("Yourn't allow to see that album.", 422))
 
             }
 
         }
 
-        const images = await Image.find({ albumId, ...filter }).sort({ uploadedAt: -1 })
 
-        res.status(201).json({
+
+        const images = await Image.find({ albumId, ...filter }).sort({ uploadedAt: -1 })
+        const users = await User.find().sort({ createdAt: -1 })
+
+       
+
+
+        res.status(200).json({
             message: "Album fetched successfully.",
             success: true,
+            users: users.map(user => user.toObject({ getters: true })),
             album: album.toObject({ getters: true }),
             images: images.map(image => image.toObject({ getters: true }))
         })
