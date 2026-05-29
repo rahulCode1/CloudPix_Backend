@@ -1,15 +1,17 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
-
-const albumSchema = new mongoose.Schema({
-
+const albumSchema = new mongoose.Schema(
+  {
     name: { type: String, required: true },
     description: { type: String },
     ownerId: { type: mongoose.Types.ObjectId, ref: "User", required: true },
     sharedWith: [{ type: mongoose.Types.ObjectId, ref: "User" }],
-    createdAt: { type: Date, default: Date.now }
+    coverImage: { type: String },
+    public_id: { type: String },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { timestamps: true },
+);
 
-}, { timestamps: true })
-
-const Album = mongoose.model("Album", albumSchema)
-module.exports = Album 
+const Album = mongoose.model("Album", albumSchema);
+module.exports = Album;

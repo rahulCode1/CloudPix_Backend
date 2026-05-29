@@ -42,17 +42,25 @@ router.get('/:albumId/images/:imageId/details',
     albumAndImgIdValidation,
     auth_check,
      imageDetails)
-router.post("/:albumId/images",
+
+
+router.post("/:albumId/addImage",
     auth_check, upload.single("image"),
     imageUploadValidation,
     uploadImage)
+
+
 router.put(`/:albumId/images/:imageId/favorite`,
     albumAndImgIdValidation,
     auth_check,
     markFavoriteOrUnfavorite)
-router.post("/images/:imageId/comments",
+
+
+router.post("/:imageId/comments",
     auth_check,
     addComments)
+
+    
 router.delete('/:albumId/images/:imageId/delete',
     albumAndImgIdValidation,
     auth_check, 

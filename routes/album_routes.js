@@ -52,23 +52,27 @@ router.get("/:albumId/images/favorites",
     albumIdValidation,
     auth_check,
     getAllFavoriteImageInAnAlbum)
+
 router.get('/:albumId/images',
     albumIdValidation,
     auth_check,
     getAllImageInAnAlbum)
+
 router.post('/',
     addAlbumValidation,
-
-    auth_check,
+   auth_check,
     createAlbum)
+
 router.put('/:albumId',
     updateDescriptionValidation,
     auth_check,
     updateAlbumDescription)
+
 router.put('/:albumId/share',
     emailTypeValidation,
     auth_check,
     addUserToShareAlbum)
+    
 router.delete('/:albumId',
     albumIdValidation,
     auth_check,

@@ -49,7 +49,7 @@ cloudinary.config({
 
 app.use("/auth", userRoutes);
 app.use("/albums", albumRoutes);
-app.use("/albums", imageRoutes);
+app.use("/image", imageRoutes);
 
 app.use((req, res, next) => {
   return next(new HttpError("This route doesn't exist.", 404));
