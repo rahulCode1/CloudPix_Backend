@@ -215,7 +215,21 @@ const deleteImage = async (req, res, next) => {
     }
 
     await cloudinary.uploader.destroy(image.publicId);
+
     await image.deleteOne();
+
+    if (album.coverImage === image.imageUrl) {
+      const otherImages = await Image.findOne({ albumId });
+
+      if (otherImages) {
+        album.coverImage = otherImages?.imageUrl;
+        album.public_id = otherImages?.publicId;
+      } else {
+        album.coverImage = "";
+        album.public_id = "";
+      }
+      await album.save();
+    }
 
     res.status(201).json({
       success: true,

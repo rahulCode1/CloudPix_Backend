@@ -30,8 +30,7 @@ const albumIdValidation = [
 ]
 
 const updateDescriptionValidation = [
-    body("description").trim().notEmpty().withMessage("Album description must be required."),
-    param("albumId")
+  param("albumId")
         .trim()
         .notEmpty()
         .withMessage("Album id is required")
