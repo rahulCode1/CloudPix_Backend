@@ -152,7 +152,7 @@ const addComments = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return next(new HttpError("Invalid data", 404, errors.array()));
+    return next(new HttpError(errors.array()[0].msg, 404));
   }
 
   const imageId = req.params.imageId;
